@@ -1,12 +1,14 @@
 struct Sheep { naked: bool, name: &'static str }
 
+struct Pig { weight: u32, name: &'static str }
+
 trait Animal {
     // Static method signature; `Self` refers to the implementor type.
     fn new(name: &'static str) -> Self;
 
     // Instance method signatures; these will return a string.
     fn name(&self) -> &'static str;
-    fn noise(&self) -> &'static str;
+    fn noise(&self) -> String;
 
     // Traits can provide default method definitions.
     fn talk(&self) {
@@ -31,6 +33,12 @@ impl Sheep {
     }
 }
 
+impl Pig {
+    fn eat(&mut self, grule: u32) {
+        self.weight = self.weight + grule;
+    }
+}
+
 // Implement the `Animal` trait for `Sheep`.
 impl Animal for Sheep {
     // `Self` is the implementor type: `Sheep`.
@@ -42,12 +50,12 @@ impl Animal for Sheep {
         self.name
     }
 
-    fn noise(&self) -> &'static str {
+    fn noise(&self) -> String {
         if self.is_naked() {
             "baaaaah?"
         } else {
             "baaaaah!"
-        }
+        }.to_string()
     }
 
     // Default trait methods can be overridden.
@@ -57,12 +65,37 @@ impl Animal for Sheep {
     }
 }
 
+impl Animal for Pig {
+    fn new(name: &'static str) -> Pig {
+        Pig { name, weight: 5 }
+    }
+
+    fn name(&self) -> &'static str {
+        self.name
+    }
+
+    fn noise(&self) -> String {
+        let mut n = String::from("O");
+        let amount = self.weight / 5;
+        for _ in 1..amount {
+            n.push_str("o");
+        }
+        n.push_str("ink!");
+        n
+    }
+}
+
 fn main() {
     // Type annotation is necessary in this case.
-    let mut dolly: Sheep = Animal::new("Dolly");
+
+
+    let mut babe: Sheep = Animal::new("Babe");
+    // let mut babe: Pig = Animal::new("Babe");
     // TODO ^ Try removing the type annotations.
 
-    dolly.talk();
-    dolly.shear();
-    dolly.talk();
+    babe.talk();
+    babe.shear();
+    // babe.eat(5);
+    // babe.eat(5);
+    babe.talk();
 }
