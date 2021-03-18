@@ -1,21 +1,19 @@
+#[cfg(feature = "sheep")]
 struct Sheep { naked: bool, name: &'static str }
-
+#[cfg(feature = "pig")]
 struct Pig { weight: u32, name: &'static str }
+struct AnimalFactory {}
 
 trait Animal {
-    // Static method signature; `Self` refers to the implementor type.
     fn new(name: &'static str) -> Self;
-
-    // Instance method signatures; these will return a string.
     fn name(&self) -> &'static str;
     fn noise(&self) -> String;
-
-    // Traits can provide default method definitions.
     fn talk(&self) {
         println!("{} says {}", self.name(), self.noise());
     }
 }
 
+#[cfg(feature = "sheep")]
 impl Sheep {
     fn is_naked(&self) -> bool {
         self.naked
@@ -23,7 +21,6 @@ impl Sheep {
 
     fn shear(&mut self) {
         if self.is_naked() {
-            // Implementor methods can use the implementor's trait methods.
             println!("{} is already naked...", self.name());
         } else {
             println!("{} gets a haircut!", self.name);
@@ -33,15 +30,17 @@ impl Sheep {
     }
 }
 
+#[cfg(feature = "pig")]
 impl Pig {
     fn eat(&mut self, grule: u32) {
+        println!("{} eats {} pounds of grule", self.name, grule);
+
         self.weight = self.weight + grule;
     }
 }
 
-// Implement the `Animal` trait for `Sheep`.
+#[cfg(feature = "sheep")]
 impl Animal for Sheep {
-    // `Self` is the implementor type: `Sheep`.
     fn new(name: &'static str) -> Sheep {
         Sheep { name: name, naked: false }
     }
@@ -58,13 +57,12 @@ impl Animal for Sheep {
         }.to_string()
     }
 
-    // Default trait methods can be overridden.
     fn talk(&self) {
-        // For example, we can add some quiet contemplation.
         println!("{} pauses briefly... {}", self.name, self.noise());
     }
 }
 
+#[cfg(feature = "pig")]
 impl Animal for Pig {
     fn new(name: &'static str) -> Pig {
         Pig { name, weight: 5 }
@@ -85,17 +83,32 @@ impl Animal for Pig {
     }
 }
 
+#[cfg(feature = "pig")]
+impl AnimalFactory{
+    fn new(name: &'static str) -> Pig {
+        Pig::new(name)
+    }
+
+    fn action(p: &mut Pig) {
+        p.eat(5);
+        p.eat(5);
+    }
+}
+
+#[cfg(feature = "sheep")]
+impl AnimalFactory {
+    fn new(name: &'static str) -> Sheep {
+        Sheep::new(name)
+    }
+
+    fn action(s: &mut Sheep) {
+        s.shear();
+    }
+}
+
 fn main() {
-    // Type annotation is necessary in this case.
-
-
-    let mut babe: Sheep = Animal::new("Babe");
-    // let mut babe: Pig = Animal::new("Babe");
-    // TODO ^ Try removing the type annotations.
-
+    let mut babe = AnimalFactory::new("babe");
     babe.talk();
-    babe.shear();
-    // babe.eat(5);
-    // babe.eat(5);
+    AnimalFactory::action(&mut babe);
     babe.talk();
 }
