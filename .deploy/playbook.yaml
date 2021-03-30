@@ -1,0 +1,25 @@
+---
+- hosts: all
+  gather_facts: true
+  collections:
+    - community.docker.docker_image
+  tasks:
+    - name: Host latest {{ container_name }} in target env
+      community.docker.docker_container:
+        name: "{{ container_name }}"
+        image: "{{ registry }}/{{ image }}"
+        command: "untitled"
+        state: started
+        recreate: yes
+        pull: yes
+        networks:
+          - name: "{{network}}"
+        container_default_behavior: no_defaults
+        network_mode: default
+        detach: false
+      register: docker_container_output
+
+    - name: Show console output
+      debug:
+        msg: "{{ docker_container_output.container.Output }}"
+
